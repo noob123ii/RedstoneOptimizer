@@ -385,10 +385,13 @@ public final class FarBlocks implements Listener {
     public void onChunkLoad(ChunkLoadEvent event) {
         Chunk chunk = event.getChunk();
         ChunkKey key = new ChunkKey(chunk.getWorld().getUID(), chunk.getX(), chunk.getZ());
-        clearHiddenIn(chunk);
         if (cache.containsKey(key) && queued.add(key)) {
             scanQueue.add(key);
         }
+        World world = chunk.getWorld();
+        int chunkX = chunk.getX();
+        int chunkZ = chunk.getZ();
+        Bukkit.getScheduler().runTaskLater(plugin, () -> rehideIn(world, chunkX, chunkZ), 2L);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -397,7 +400,6 @@ public final class FarBlocks implements Listener {
         ChunkKey key = new ChunkKey(chunk.getWorld().getUID(), chunk.getX(), chunk.getZ());
         queued.remove(key);
         scanQueue.remove(key);
-        clearHiddenIn(chunk);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -440,11 +442,28 @@ public final class FarBlocks implements Listener {
         }
     }
 
-    private void clearHiddenIn(Chunk chunk) {
-        int chunkX = chunk.getX();
-        int chunkZ = chunk.getZ();
-        for (Set<BlockPosition> positions : hidden.values()) {
-            positions.removeIf(position -> position.blockX() >> 4 == chunkX && position.blockZ() >> 4 == chunkZ);
+    private void rehideIn(World world, int chunkX, int chunkZ) {
+        if (!world.isChunkLoaded(chunkX, chunkZ)) {
+            return;
+        }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (!player.getWorld().equals(world)) {
+                continue;
+            }
+            Set<BlockPosition> positions = hidden.get(player.getUniqueId());
+            if (positions == null || positions.isEmpty()) {
+                continue;
+            }
+            Map<Position, BlockData> air = new HashMap<>();
+            for (BlockPosition position : positions) {
+                if (air.size() >= SEND_BATCH) {
+                    break;
+                }
+                if (position.blockX() >> 4 == chunkX && position.blockZ() >> 4 == chunkZ) {
+                    air.put(position, AIR);
+                }
+            }
+            send(player, air);
         }
     }
 
