@@ -44,7 +44,7 @@ redstone:
 far-blocks:
   enabled: true
   distance: 40
-  interval-ticks: 10
+  interval-ticks: 5
   scan-budget: 6
 
 hoppers:

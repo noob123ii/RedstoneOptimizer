@@ -22,9 +22,9 @@ The range is set on each item entity, so item frames and paintings keep their no
 
 ## Far blocks
 
-Hoppers and redstone parts are removed from the client beyond `far-blocks.distance` blocks. This is block distance, not chunk distance. The server never changes the real blocks, so farms, hoppers, water and storage still work. The first pass scans loaded chunks for hopper and redstone positions, then the client is sent air for those positions in batched section updates. Walking back inside the distance restores the real block states.
+Hoppers and redstone parts are removed from the client beyond `far-blocks.distance` blocks, measured from the camera/eye position. This is block distance, not chunk distance. The server never changes the real blocks, so farms, hoppers, water and storage still work. The client is sent air for individual positions in batched section updates. Walking back inside the distance restores those exact block states.
 
-Hoppers are found from chunk block entities every pass, so they do not wait for the slower redstone palette scan. The check runs every 10 ticks.
+Hoppers are found from every chunk the client has loaded, not just nearby chunks. They do not wait for the slower redstone palette scan. The check runs every 5 ticks. A chunk load only triggers a per-position re-hide, never a whole-chunk clear.
 
 ## Item piles
 
@@ -87,7 +87,7 @@ Aliases are `/ropt` and `/ro`.
 
 `far-blocks.distance` is the block distance used for both hiding and redstone update filtering. Default is 40 blocks. Values are kept between 30 and 40.
 
-`far-blocks.scan-budget` is how many chunks are inspected per tick while building the redstone hide list. Hoppers do not depend on this scan. Lower it if chunk scanning causes a tick spike.
+`far-blocks.scan-budget` is how many chunks are inspected per tick while building the redstone hide list. Hoppers do not depend on this scan. The scan is only for finding candidates; hiding and restoring still happen per block position.
 
 `hoppers.region-chunks` is the radius used for the hopper cap. With 8, the plugin checks 17 by 17 loaded chunks.
 
@@ -95,7 +95,7 @@ Aliases are `/ropt` and `/ro`.
 
 ## Tradeoffs
 
-Redstone only stops rendering beyond the configured block distance. Inside that distance it updates and animates normally. A large schematic paste or a chunk reload can leave far blocks visible until the next hide pass catches them.
+Redstone only stops rendering beyond the configured block distance. Inside that distance it updates and animates normally. A large schematic paste can leave far blocks visible until the next hide pass catches them.
 
 The plugin does not make redstone calculate faster on the server. It reduces client chunk rebuilds, network traffic and item entity load.
 

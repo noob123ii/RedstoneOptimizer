@@ -149,7 +149,7 @@ public final class RedstonePackets implements Listener {
                 @Override
                 public boolean far(int blockX, int blockY, int blockZ) {
                     double dx = blockX + 0.5D - player.getX();
-                    double dy = blockY + 0.5D - player.getY();
+                    double dy = blockY + 0.5D - player.getY() + player.getEyeHeight();
                     double dz = blockZ + 0.5D - player.getZ();
                     return dx * dx + dy * dy + dz * dz > rangeSq;
                 }
@@ -170,7 +170,7 @@ public final class RedstonePackets implements Listener {
 
         private double distanceSq(Player player, int blockX, int blockY, int blockZ) {
             double dx = blockX + 0.5D - player.getX();
-            double dy = blockY + 0.5D - player.getY();
+            double dy = blockY + 0.5D - player.getY() + player.getEyeHeight();
             double dz = blockZ + 0.5D - player.getZ();
             return dx * dx + dy * dy + dz * dz;
         }

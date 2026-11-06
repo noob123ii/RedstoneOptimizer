@@ -48,7 +48,7 @@ public final class Options {
         this.hopperCap = clamp(config.getInt("hoppers.max-per-region", 4000), 1, 200000);
         this.farBlocksOn = config.getBoolean("far-blocks.enabled", true);
         this.farBlockDistance = clamp(config.getInt("far-blocks.distance", 40), 30, 40);
-        this.hideEvery = clamp(config.getInt("far-blocks.interval-ticks", 10), 5, 200);
+        this.hideEvery = clamp(config.getInt("far-blocks.interval-ticks", 5), 5, 200);
         this.scanBudget = clamp(config.getInt("far-blocks.scan-budget", 6), 1, 16);
         this.lagWatchOn = config.getBoolean("tps-guard.enabled", true);
         this.lowTps = clamp(config.getDouble("tps-guard.low-tps", 17.0D), 1.0D, 20.0D);

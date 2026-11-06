@@ -143,7 +143,7 @@ public final class FarBlocks implements Listener {
             scan(key);
         }
         ticks++;
-        if (ticks % Math.min(10, options.hideEvery) == 0) {
+        if (ticks % Math.max(1, Math.min(5, options.hideEvery)) == 0) {
             hidePass();
         }
     }
@@ -160,27 +160,18 @@ public final class FarBlocks implements Listener {
 
     private void hideFor(Player player) {
         World world = player.getWorld();
-        Chunk center = player.getChunk();
         int distance = options.farBlockDistance;
-        int view = player.getSendViewDistance();
-        if (view <= 0) {
-            view = player.getViewDistance();
-        }
-        int scanRadius = Math.max((distance + 15) / 16 + 1, view);
         double hideSq = (double) distance * distance;
-        double restoreSq = hideSq;
 
-        for (int x = -scanRadius; x <= scanRadius; x++) {
-            for (int z = -scanRadius; z <= scanRadius; z++) {
-                int chunkX = center.getX() + x;
-                int chunkZ = center.getZ() + z;
-                if (!world.isChunkLoaded(chunkX, chunkZ)) {
-                    continue;
-                }
-                ChunkKey key = new ChunkKey(world.getUID(), chunkX, chunkZ);
-                if (!cache.containsKey(key) && queued.add(key)) {
-                    scanQueue.add(key);
-                }
+        Map<ChunkKey, Chunk> sent = new HashMap<>();
+        for (Chunk chunk : player.getSentChunks()) {
+            if (!chunk.getWorld().equals(world)) {
+                continue;
+            }
+            ChunkKey key = new ChunkKey(world.getUID(), chunk.getX(), chunk.getZ());
+            sent.put(key, chunk);
+            if (!cache.containsKey(key) && queued.add(key)) {
+                scanQueue.add(key);
             }
         }
 
@@ -189,7 +180,7 @@ public final class FarBlocks implements Listener {
         Iterator<BlockPosition> iterator = hiddenPositions.iterator();
         while (iterator.hasNext() && restore.size() < SEND_BATCH) {
             BlockPosition position = iterator.next();
-            if (distanceSq(player, position) > restoreSq) {
+            if (distanceSq(player, position) > hideSq) {
                 continue;
             }
             iterator.remove();
@@ -202,53 +193,42 @@ public final class FarBlocks implements Listener {
 
         Map<Position, BlockData> hide = new HashMap<>();
         hopper:
-        for (int x = -scanRadius; x <= scanRadius; x++) {
-            for (int z = -scanRadius; z <= scanRadius; z++) {
-                int chunkX = center.getX() + x;
-                int chunkZ = center.getZ() + z;
-                if (!world.isChunkLoaded(chunkX, chunkZ)) {
+        for (Map.Entry<ChunkKey, Chunk> entry : sent.entrySet()) {
+            if (cache.containsKey(entry.getKey())) {
+                continue;
+            }
+            for (BlockState state : entry.getValue().getTileEntities()) {
+                if (!(state instanceof Hopper)) {
                     continue;
                 }
-                if (cache.containsKey(new ChunkKey(world.getUID(), chunkX, chunkZ))) {
+                if (hide.size() >= SEND_BATCH) {
+                    break hopper;
+                }
+                BlockPosition position = Position.block(state.getX(), state.getY(), state.getZ());
+                if (distanceSq(player, position) <= hideSq) {
                     continue;
                 }
-                Chunk chunk = world.getChunkAt(chunkX, chunkZ);
-                for (BlockState state : chunk.getTileEntities()) {
-                    if (!(state instanceof Hopper)) {
-                        continue;
-                    }
-                    if (hide.size() >= SEND_BATCH) {
-                        break hopper;
-                    }
-                    BlockPosition position = Position.block(state.getX(), state.getY(), state.getZ());
-                    if (distanceSq(player, position) <= hideSq) {
-                        continue;
-                    }
-                    if (hiddenPositions.add(position)) {
-                        hide.put(position, AIR);
-                    }
+                if (hiddenPositions.add(position)) {
+                    hide.put(position, AIR);
                 }
             }
         }
 
         outer:
-        for (int x = -scanRadius; x <= scanRadius; x++) {
-            for (int z = -scanRadius; z <= scanRadius; z++) {
-                ChunkKey key = new ChunkKey(world.getUID(), center.getX() + x, center.getZ() + z);
-                Set<BlockPosition> positions = cache.get(key);
-                if (positions == null) {
+        for (ChunkKey key : sent.keySet()) {
+            Set<BlockPosition> positions = cache.get(key);
+            if (positions == null) {
+                continue;
+            }
+            for (BlockPosition position : positions) {
+                if (hide.size() >= SEND_BATCH) {
+                    break outer;
+                }
+                if (distanceSq(player, position) <= hideSq) {
                     continue;
                 }
-                for (BlockPosition position : positions) {
-                    if (hide.size() >= SEND_BATCH) {
-                        break outer;
-                    }
-                    if (distanceSq(player, position) <= hideSq) {
-                        continue;
-                    }
-                    if (hiddenPositions.add(position)) {
-                        hide.put(position, AIR);
-                    }
+                if (hiddenPositions.add(position)) {
+                    hide.put(position, AIR);
                 }
             }
         }
@@ -353,7 +333,7 @@ public final class FarBlocks implements Listener {
 
     private double distanceSq(Player player, BlockPosition position) {
         double dx = position.blockX() + 0.5D - player.getX();
-        double dy = position.blockY() + 0.5D - player.getY();
+        double dy = position.blockY() + 0.5D - player.getY() + player.getEyeHeight();
         double dz = position.blockZ() + 0.5D - player.getZ();
         return dx * dx + dy * dy + dz * dz;
     }
@@ -446,6 +426,7 @@ public final class FarBlocks implements Listener {
         if (!world.isChunkLoaded(chunkX, chunkZ)) {
             return;
         }
+        double hideSq = (double) options.farBlockDistance * options.farBlockDistance;
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (!player.getWorld().equals(world)) {
                 continue;
@@ -459,7 +440,8 @@ public final class FarBlocks implements Listener {
                 if (air.size() >= SEND_BATCH) {
                     break;
                 }
-                if (position.blockX() >> 4 == chunkX && position.blockZ() >> 4 == chunkZ) {
+                if (position.blockX() >> 4 == chunkX && position.blockZ() >> 4 == chunkZ
+                        && distanceSq(player, position) > hideSq) {
                     air.put(position, AIR);
                 }
             }
