@@ -95,10 +95,10 @@ public final class AdminCommands implements CommandExecutor, TabCompleter {
         if (farBlocks == null || !options.farBlocksOn) {
             sender.sendMessage(row("Far blocks", "off"));
         } else if (sender instanceof Player player) {
-            sender.sendMessage(row("Far blocks", farBlocks.hideChunks() + "/" + farBlocks.restoreChunks()
+            sender.sendMessage(row("Far blocks", farBlocks.hideChunks(player) + "/" + farBlocks.restoreChunks(player)
                     + " chunks, " + farBlocks.hiddenCount(player) + " hidden"));
         } else {
-            sender.sendMessage(row("Far blocks", farBlocks.hideChunks() + " hide, " + farBlocks.restoreChunks() + " restore"));
+            sender.sendMessage(row("Far blocks", options.farBlocksToView ? "to view distance" : farBlocks.hideChunks() + " hide"));
         }
     }
 

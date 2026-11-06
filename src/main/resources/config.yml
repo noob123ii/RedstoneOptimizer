@@ -49,10 +49,11 @@ redstone:
 
 far-blocks:
   enabled: true
-  hide-chunks: 4
-  restore-chunks: 3
-  interval-ticks: 20
-  scan-budget: 2
+  hide-to-view: true
+  hide-chunks: 10
+  restore-chunks: 8
+  interval-ticks: 10
+  scan-budget: 6
   max-hidden: 20000
 
 hoppers:

@@ -26,7 +26,7 @@ The range is set on each item entity, so item frames and paintings keep their no
 
 Hoppers and redstone parts can be removed from the client when they are far away. The server never changes the real blocks, so farms, hoppers, water and storage still work. The first pass scans loaded chunks for hopper and redstone positions, then the client is sent air for those positions in batched section updates. Walking back inside `far-blocks.restore-chunks` restores the real block states.
 
-The default is hide beyond 4 chunks and restore within 3 chunks. The gap is deliberate so a player does not see blocks flicker on the edge.
+By default the hide range follows the player's sent view distance, so blocks are hidden almost to the render edge. Restoration happens 8 blocks inside the hide edge, and the check runs every 10 ticks. Hoppers are found from chunk block entities every pass, so they do not wait for the slower redstone palette scan.
 
 ## Item piles
 
@@ -93,9 +93,11 @@ Aliases are `/ropt` and `/ro`.
 
 `redstone.materials` lists the blocks treated as redstone parts. Buttons, pressure plates and copper bulbs are also matched by name.
 
-`far-blocks.hide-chunks` and `far-blocks.restore-chunks` control the far block hider. Hide is normally larger than restore to avoid edge flicker.
+`far-blocks.hide-to-view` follows the player's sent view distance and hides blocks almost to the render edge. Set it to false if you want the fixed `hide-chunks` value instead.
 
-`far-blocks.scan-budget` is how many chunks are inspected per tick while building the hide list. Lower it if chunk scanning causes a tick spike.
+`far-blocks.hide-chunks` is the fixed hide radius used when `hide-to-view` is false. `restore-chunks` is the fixed restore radius for that mode.
+
+`far-blocks.scan-budget` is how many chunks are inspected per tick while building the redstone hide list. Hoppers do not depend on this scan. Lower it if chunk scanning causes a tick spike.
 
 `hoppers.region-chunks` is the radius used for the hopper cap. With 8, the plugin checks 17 by 17 loaded chunks.
 

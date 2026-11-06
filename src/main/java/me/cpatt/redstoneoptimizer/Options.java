@@ -33,6 +33,7 @@ public final class Options {
     public final int extraCheck;
     public final int hopperTuneEvery;
     public final boolean farBlocksOn;
+    public final boolean farBlocksToView;
     public final int hideChunks;
     public final int restoreChunks;
     public final int hideEvery;
@@ -69,10 +70,11 @@ public final class Options {
         this.extraCheck = clamp(config.getInt("hoppers.lag-tuning.extra-check-ticks", 1), 0, 20);
         this.hopperTuneEvery = clamp(config.getInt("hoppers.lag-tuning.interval-ticks", 100), 20, 1200);
         this.farBlocksOn = config.getBoolean("far-blocks.enabled", true);
-        this.hideChunks = clamp(config.getInt("far-blocks.hide-chunks", 4), 2, 16);
-        this.restoreChunks = clamp(config.getInt("far-blocks.restore-chunks", 3), 1, this.hideChunks);
-        this.hideEvery = clamp(config.getInt("far-blocks.interval-ticks", 20), 5, 200);
-        this.scanBudget = clamp(config.getInt("far-blocks.scan-budget", 2), 1, 16);
+        this.farBlocksToView = config.getBoolean("far-blocks.hide-to-view", true);
+        this.hideChunks = clamp(config.getInt("far-blocks.hide-chunks", 10), 2, 16);
+        this.restoreChunks = clamp(config.getInt("far-blocks.restore-chunks", 8), 1, 16);
+        this.hideEvery = clamp(config.getInt("far-blocks.interval-ticks", 10), 5, 200);
+        this.scanBudget = clamp(config.getInt("far-blocks.scan-budget", 6), 1, 16);
         this.maxHidden = clamp(config.getInt("far-blocks.max-hidden", 20000), 1000, 200000);
         this.lagWatchOn = config.getBoolean("tps-guard.enabled", true);
         this.lowTps = clamp(config.getDouble("tps-guard.low-tps", 17.0D), 1.0D, 20.0D);
