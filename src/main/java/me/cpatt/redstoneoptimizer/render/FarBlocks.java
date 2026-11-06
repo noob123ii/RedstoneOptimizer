@@ -213,7 +213,7 @@ public final class FarBlocks implements Listener {
                     if (!(state instanceof Hopper)) {
                         continue;
                     }
-                    if (hiddenPositions.size() >= options.maxHidden || hide.size() >= SEND_BATCH) {
+                    if (hide.size() >= SEND_BATCH) {
                         break hopper;
                     }
                     BlockPosition position = Position.block(state.getX(), state.getY(), state.getZ());
@@ -236,7 +236,7 @@ public final class FarBlocks implements Listener {
                     continue;
                 }
                 for (BlockPosition position : positions) {
-                    if (hiddenPositions.size() >= options.maxHidden || hide.size() >= SEND_BATCH) {
+                    if (hide.size() >= SEND_BATCH) {
                         break outer;
                     }
                     if (distanceSq(player, position) <= hideSq) {

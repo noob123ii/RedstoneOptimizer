@@ -46,7 +46,6 @@ far-blocks:
   distance: 128
   interval-ticks: 10
   scan-budget: 6
-  max-hidden: 99999999999
 
 hoppers:
   enabled: true
