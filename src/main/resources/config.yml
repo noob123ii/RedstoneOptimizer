@@ -1,0 +1,72 @@
+items:
+  enabled: true
+  tracking-chunks: 2
+  sweep-interval-ticks: 40
+  merge:
+    enabled: true
+    interval-ticks: 40
+    radius: 1.25
+    low-tps-radius: 2.5
+    max-merges-per-pass: 2048
+
+redstone:
+  enabled: true
+  quiet-all: true
+  view-chunks: 2
+  repair-chunks: 2
+  block-events: true
+  refresh-interval-ticks: 20
+  refresh-batch: 512
+  max-dirty-positions: 4096
+  materials:
+    - REDSTONE_WIRE
+    - REDSTONE_TORCH
+    - REDSTONE_WALL_TORCH
+    - REDSTONE_LAMP
+    - REDSTONE_BLOCK
+    - REPEATER
+    - COMPARATOR
+    - OBSERVER
+    - PISTON
+    - STICKY_PISTON
+    - MOVING_PISTON
+    - PISTON_HEAD
+    - LEVER
+    - TARGET
+    - TRIPWIRE
+    - TRIPWIRE_HOOK
+    - DAYLIGHT_DETECTOR
+    - SCULK_SENSOR
+    - CALIBRATED_SCULK_SENSOR
+    - CRAFTER
+    - DISPENSER
+    - DROPPER
+    - HOPPER
+    - RAIL
+    - POWERED_RAIL
+    - DETECTOR_RAIL
+    - ACTIVATOR_RAIL
+
+far-blocks:
+  enabled: true
+  hide-chunks: 4
+  restore-chunks: 3
+  interval-ticks: 20
+  scan-budget: 2
+  max-hidden: 20000
+
+hoppers:
+  enabled: true
+  region-chunks: 8
+  max-per-region: 4000
+  lag-tuning:
+    enabled: true
+    extra-transfer-ticks: 4
+    extra-check-ticks: 1
+    interval-ticks: 100
+
+tps-guard:
+  enabled: true
+  low-tps: 17.0
+  recover-tps: 19.5
+  check-interval-ticks: 100

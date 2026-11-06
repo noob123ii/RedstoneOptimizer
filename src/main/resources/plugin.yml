@@ -1,0 +1,26 @@
+name: RedstoneOptimizer
+version: 1.0.0
+main: me.cpatt.redstoneoptimizer.RedstoneOptimizer
+api-version: '1.21'
+author: cpatt
+description: Quiet redstone updates and item rendering for busy farms without touching server logic.
+commands:
+  redstoneoptimizer:
+    description: Inspect or reload RedstoneOptimizer.
+    usage: /redstoneoptimizer status
+    aliases:
+      - ropt
+      - ro
+permissions:
+  redstoneoptimizer.admin:
+    description: Allows status and reload.
+    default: op
+  redstoneoptimizer.bypass.redstone:
+    description: Keeps full redstone updates for this player.
+    default: false
+  redstoneoptimizer.bypass.hopper:
+    description: Ignores the area hopper placement cap.
+    default: false
+  redstoneoptimizer.bypass.farblocks:
+    description: Keeps far hoppers and redstone parts visible.
+    default: false
