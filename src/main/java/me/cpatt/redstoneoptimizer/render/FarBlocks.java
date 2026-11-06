@@ -9,6 +9,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -415,17 +416,16 @@ public final class FarBlocks implements Listener {
     public void onChunkLoad(ChunkLoadEvent event) {
         Chunk chunk = event.getChunk();
         ChunkKey key = new ChunkKey(chunk.getWorld().getUID(), chunk.getX(), chunk.getZ());
-        cache.remove(key);
-        queued.remove(key);
-        scanQueue.remove(key);
         clearHiddenIn(chunk);
+        if (cache.containsKey(key) && queued.add(key)) {
+            scanQueue.add(key);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onChunkUnload(ChunkUnloadEvent event) {
         Chunk chunk = event.getChunk();
         ChunkKey key = new ChunkKey(chunk.getWorld().getUID(), chunk.getX(), chunk.getZ());
-        cache.remove(key);
         queued.remove(key);
         scanQueue.remove(key);
         clearHiddenIn(chunk);
@@ -463,7 +463,7 @@ public final class FarBlocks implements Listener {
         }
     }
 
-    private void removeAll(java.util.List<Block> blocks) {
+    private void removeAll(List<Block> blocks) {
         for (Block block : blocks) {
             if (hideable(block.getType())) {
                 remove(block);
@@ -474,12 +474,8 @@ public final class FarBlocks implements Listener {
     private void clearHiddenIn(Chunk chunk) {
         int chunkX = chunk.getX();
         int chunkZ = chunk.getZ();
-        UUID worldId = chunk.getWorld().getUID();
         for (Set<BlockPosition> positions : hidden.values()) {
-            positions.removeIf(position -> position.blockX() >> 4 == chunkX
-                    && position.blockZ() >> 4 == chunkZ
-                    && position.blockX() >= chunkX * 16
-                    && position.blockX() < chunkX * 16 + 16);
+            positions.removeIf(position -> position.blockX() >> 4 == chunkX && position.blockZ() >> 4 == chunkZ);
         }
     }
 
