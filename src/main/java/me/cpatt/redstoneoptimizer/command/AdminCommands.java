@@ -40,12 +40,20 @@ public final class AdminCommands implements CommandExecutor, TabCompleter {
             return true;
         }
         if (args[0].equalsIgnoreCase("reload")) {
-            plugin.reloadAll();
-            sender.sendMessage(Component.text("RedstoneOptimizer reloaded.", NamedTextColor.GREEN));
+            boolean ok = plugin.reloadAll();
+            sender.sendMessage(Component.text(ok ? "RedstoneOptimizer reloaded." : "Reload failed, old config kept.",
+                    ok ? NamedTextColor.GREEN : NamedTextColor.RED));
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("reset")) {
+            boolean ok = plugin.resetConfig();
+            sender.sendMessage(Component.text(ok ? "Config reset to defaults." : "Reset failed, old config kept.",
+                    ok ? NamedTextColor.GREEN : NamedTextColor.RED));
             return true;
         }
         sender.sendMessage(Component.text("Usage: /" + label + " status", NamedTextColor.GRAY));
         sender.sendMessage(Component.text("Usage: /" + label + " reload", NamedTextColor.GRAY));
+        sender.sendMessage(Component.text("Usage: /" + label + " reset", NamedTextColor.GRAY));
         return true;
     }
 
@@ -118,6 +126,9 @@ public final class AdminCommands implements CommandExecutor, TabCompleter {
         }
         if ("reload".startsWith(prefix)) {
             options.add("reload");
+        }
+        if ("reset".startsWith(prefix)) {
+            options.add("reset");
         }
         return options;
     }

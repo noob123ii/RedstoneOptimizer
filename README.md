@@ -63,7 +63,9 @@ gradlew.bat build
 
 `/redstoneoptimizer status` shows ranges, held packet counts, merge count, hopper count near the sender and TPS state.
 
-`/redstoneoptimizer reload` reloads the config and restarts the background work.
+`/redstoneoptimizer reload` reloads the config file and restarts the background work.
+
+`/redstoneoptimizer reset` replaces the config with the packaged defaults and restarts the work. This overwrites the current config file.
 
 Aliases are `/ropt` and `/ro`.
 

@@ -90,11 +90,37 @@ public final class RedstoneOptimizer extends JavaPlugin implements Listener {
         }
     }
 
-    public void reloadAll() {
+    public boolean reloadAll() {
+        Options previous = options;
         stopModules();
-        reloadConfig();
-        options = Options.read(getConfig());
-        startModules();
+        try {
+            reloadConfig();
+            options = Options.read(getConfig());
+            startModules();
+            return true;
+        } catch (Throwable throwable) {
+            getLogger().log(java.util.logging.Level.SEVERE, "Could not reload the config, keeping the old one", throwable);
+            options = previous;
+            startModules();
+            return false;
+        }
+    }
+
+    public boolean resetConfig() {
+        Options previous = options;
+        stopModules();
+        try {
+            saveResource("config.yml", true);
+            reloadConfig();
+            options = Options.read(getConfig());
+            startModules();
+            return true;
+        } catch (Throwable throwable) {
+            getLogger().log(java.util.logging.Level.SEVERE, "Could not reset the config, keeping the old one", throwable);
+            options = previous;
+            startModules();
+            return false;
+        }
     }
 
     @EventHandler
