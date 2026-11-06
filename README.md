@@ -89,6 +89,8 @@ Aliases are `/ropt` and `/ro`.
 
 `far-blocks.scan-budget` is how many chunks are inspected per tick while building the redstone hide list. Hoppers do not depend on this scan. Lower it if chunk scanning causes a tick spike.
 
+`far-blocks.max-hidden` caps how many positions can be hidden per player. Default is `99999999999`, which is effectively unlimited.
+
 `hoppers.region-chunks` is the radius used for the hopper cap. With 8, the plugin checks 17 by 17 loaded chunks.
 
 `hoppers.max-per-region` is the cap. Default is 4000.

@@ -26,7 +26,7 @@ public final class Options {
     public final int farBlockDistance;
     public final int hideEvery;
     public final int scanBudget;
-    public final int maxHidden;
+    public final long maxHidden;
     public final boolean lagWatchOn;
     public final double lowTps;
     public final double goodTps;
@@ -51,7 +51,7 @@ public final class Options {
         this.farBlockDistance = clamp(config.getInt("far-blocks.distance", 128), 16, 512);
         this.hideEvery = clamp(config.getInt("far-blocks.interval-ticks", 10), 5, 200);
         this.scanBudget = clamp(config.getInt("far-blocks.scan-budget", 6), 1, 16);
-        this.maxHidden = clamp(config.getInt("far-blocks.max-hidden", 20000), 1000, 200000);
+        this.maxHidden = clamp(config.getLong("far-blocks.max-hidden", 99999999999L), 1000L, 99999999999L);
         this.lagWatchOn = config.getBoolean("tps-guard.enabled", true);
         this.lowTps = clamp(config.getDouble("tps-guard.low-tps", 17.0D), 1.0D, 20.0D);
         this.goodTps = clamp(config.getDouble("tps-guard.recover-tps", 19.5D), this.lowTps, 20.0D);
@@ -91,6 +91,10 @@ public final class Options {
     }
 
     private static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    private static long clamp(long value, long min, long max) {
         return Math.max(min, Math.min(max, value));
     }
 
