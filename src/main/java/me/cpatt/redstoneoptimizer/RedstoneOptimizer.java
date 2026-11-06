@@ -38,8 +38,8 @@ public final class RedstoneOptimizer extends JavaPlugin implements Listener {
             command.setExecutor(executor);
             command.setTabCompleter(executor);
         }
-        getLogger().info("Items " + options.itemChunks + " chunks, redstone " + options.redstoneChunks
-                + " chunks, hopper cap " + options.hopperCap + " per " + options.hopperChunks + " chunks");
+        getLogger().info("Items " + options.itemChunks + " chunks, far blocks " + options.farBlockDistance
+                + " blocks, hopper cap " + options.hopperCap + " per " + options.hopperChunks + " chunks");
     }
 
     @Override
@@ -53,7 +53,7 @@ public final class RedstoneOptimizer extends JavaPlugin implements Listener {
         itemTracking = new ItemTracking(this, options);
         itemPiles = new ItemPiles(this, options, lagWatch);
         redstonePackets = new RedstonePackets(this, options);
-        hopperGuard = new HopperGuard(this, options, lagWatch);
+        hopperGuard = new HopperGuard(this, options);
         farBlocks = new FarBlocks(this, options);
         lagWatch.start();
         itemTracking.start();

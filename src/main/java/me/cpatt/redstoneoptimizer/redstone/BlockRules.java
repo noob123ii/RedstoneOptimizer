@@ -9,6 +9,4 @@ interface BlockRules {
     boolean far(int x, int y, int z);
 
     boolean insideSection(int minX, int minY, int minZ, int maxX, int maxY, int maxZ);
-
-    void remember(int x, int y, int z);
 }

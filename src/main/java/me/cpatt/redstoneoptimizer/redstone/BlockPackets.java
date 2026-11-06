@@ -168,11 +168,6 @@ final class BlockPackets {
     }
 
     private Object screenUpdate(Object packet, BlockRules rules) throws Exception {
-        Object state = updateState.invoke(packet);
-        Material material = (Material) stateMaterial.invoke(state);
-        if (!rules.redstone(material)) {
-            return packet;
-        }
         Object position = updatePos.invoke(packet);
         int x = (Integer) posX.invoke(position);
         int y = (Integer) posY.invoke(position);
@@ -180,8 +175,9 @@ final class BlockPackets {
         if (!rules.far(x, y, z)) {
             return packet;
         }
-        rules.remember(x, y, z);
-        return null;
+        Object state = updateState.invoke(packet);
+        Material material = (Material) stateMaterial.invoke(state);
+        return rules.redstone(material) ? null : packet;
     }
 
     private Object screenSection(Object packet, BlockRules rules) throws Exception {
@@ -200,11 +196,10 @@ final class BlockPackets {
         boolean[] broken = new boolean[1];
         BiConsumer<Object, Object> consumer = (position, state) -> {
             try {
-                Material material = (Material) stateMaterial.invoke(state);
                 int x = (Integer) posX.invoke(position);
                 int y = (Integer) posY.invoke(position);
                 int z = (Integer) posZ.invoke(position);
-                changes.add(new BlockChange(position, state, material, x, y, z));
+                changes.add(new BlockChange(position, state, x, y, z));
             } catch (Throwable throwable) {
                 broken[0] = true;
             }
@@ -215,24 +210,23 @@ final class BlockPackets {
         }
 
         List<BlockChange> kept = new ArrayList<>(changes.size());
-        List<BlockChange> hidden = null;
+        boolean dropped = false;
         for (BlockChange change : changes) {
-            if (rules.redstone(change.material()) && rules.far(change.x(), change.y(), change.z())) {
-                if (hidden == null) {
-                    hidden = new ArrayList<>();
-                }
-                hidden.add(change);
+            if (!rules.far(change.x(), change.y(), change.z())) {
+                kept.add(change);
+                continue;
+            }
+            Material material = (Material) stateMaterial.invoke(change.state());
+            if (rules.redstone(material)) {
+                dropped = true;
             } else {
                 kept.add(change);
             }
         }
-        if (hidden == null) {
+        if (!dropped) {
             return packet;
         }
         if (kept.isEmpty()) {
-            for (BlockChange change : hidden) {
-                rules.remember(change.x(), change.y(), change.z());
-            }
             return null;
         }
 
@@ -242,11 +236,7 @@ final class BlockPackets {
                 Object relative = relativePos.invoke(null, change.position());
                 mapPut.invoke(map, relative, change.state());
             }
-            Object replacement = sectionCtor.newInstance(section, map);
-            for (BlockChange change : hidden) {
-                rules.remember(change.x(), change.y(), change.z());
-            }
-            return replacement;
+            return sectionCtor.newInstance(section, map);
         } catch (Throwable throwable) {
             complain(throwable);
             return packet;
@@ -254,12 +244,6 @@ final class BlockPackets {
     }
 
     private Object screenEvent(Object packet, BlockRules rules) throws Exception {
-        Object block = eventBlock.invoke(packet);
-        Object state = blockState.invoke(block);
-        Material material = (Material) stateMaterial.invoke(state);
-        if (!rules.redstone(material)) {
-            return packet;
-        }
         Object position = eventPos.invoke(packet);
         int x = (Integer) posX.invoke(position);
         int y = (Integer) posY.invoke(position);
@@ -267,7 +251,10 @@ final class BlockPackets {
         if (!rules.far(x, y, z)) {
             return packet;
         }
-        return null;
+        Object block = eventBlock.invoke(packet);
+        Object state = blockState.invoke(block);
+        Material material = (Material) stateMaterial.invoke(state);
+        return rules.redstone(material) ? null : packet;
     }
 
     private void complain(Throwable throwable) {
@@ -276,6 +263,6 @@ final class BlockPackets {
         }
     }
 
-    private record BlockChange(Object position, Object state, Material material, int x, int y, int z) {
+    private record BlockChange(Object position, Object state, int x, int y, int z) {
     }
 }

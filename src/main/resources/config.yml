@@ -11,13 +11,7 @@ items:
 
 redstone:
   enabled: true
-  quiet-all: true
-  view-chunks: 2
-  repair-chunks: 2
   block-events: true
-  refresh-interval-ticks: 20
-  refresh-batch: 512
-  max-dirty-positions: 4096
   materials:
     - REDSTONE_WIRE
     - REDSTONE_TORCH
@@ -49,9 +43,7 @@ redstone:
 
 far-blocks:
   enabled: true
-  hide-to-view: true
-  hide-chunks: 10
-  restore-chunks: 8
+  distance: 128
   interval-ticks: 10
   scan-budget: 6
   max-hidden: 20000
@@ -60,11 +52,6 @@ hoppers:
   enabled: true
   region-chunks: 8
   max-per-region: 4000
-  lag-tuning:
-    enabled: true
-    extra-transfer-ticks: 4
-    extra-check-ticks: 1
-    interval-ticks: 100
 
 tps-guard:
   enabled: true

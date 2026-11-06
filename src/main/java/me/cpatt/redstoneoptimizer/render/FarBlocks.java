@@ -129,26 +129,12 @@ public final class FarBlocks implements Listener {
         return positions == null ? 0 : positions.size();
     }
 
-    public int hideChunks() {
-        return options.hideChunks;
-    }
-
-    public int restoreChunks() {
-        return options.restoreChunks;
-    }
-
-    public int hideChunks(Player player) {
-        return hideRadius(player);
-    }
-
-    public int restoreChunks(Player player) {
-        int hide = hideRadius(player);
-        return Math.max(1, restoreRange(player, hide) / 16);
+    public int distance() {
+        return options.farBlockDistance;
     }
 
     private void tick() {
-        int budget = options.farBlocksToView ? Math.max(4, options.scanBudget) : options.scanBudget;
-        for (int i = 0; i < budget; i++) {
+        for (int i = 0; i < options.scanBudget; i++) {
             ChunkKey key = scanQueue.poll();
             if (key == null) {
                 break;
@@ -157,8 +143,7 @@ public final class FarBlocks implements Listener {
             scan(key);
         }
         ticks++;
-        int every = options.farBlocksToView ? Math.min(10, options.hideEvery) : options.hideEvery;
-        if (ticks % every == 0) {
+        if (ticks % Math.min(10, options.hideEvery) == 0) {
             hidePass();
         }
     }
@@ -176,14 +161,13 @@ public final class FarBlocks implements Listener {
     private void hideFor(Player player) {
         World world = player.getWorld();
         Chunk center = player.getChunk();
-        int hideRadius = hideRadius(player);
-        int hideRange = hideRadius * 16;
-        int restoreRange = restoreRange(player, hideRadius);
-        double hideSq = (double) hideRange * hideRange;
-        double restoreSq = (double) restoreRange * restoreRange;
+        int distance = options.farBlockDistance;
+        int scanRadius = (distance + 15) / 16 + 1;
+        double hideSq = (double) distance * distance;
+        double restoreSq = hideSq;
 
-        for (int x = -hideRadius; x <= hideRadius; x++) {
-            for (int z = -hideRadius; z <= hideRadius; z++) {
+        for (int x = -scanRadius; x <= scanRadius; x++) {
+            for (int z = -scanRadius; z <= scanRadius; z++) {
                 int chunkX = center.getX() + x;
                 int chunkZ = center.getZ() + z;
                 if (!world.isChunkLoaded(chunkX, chunkZ)) {
@@ -214,8 +198,8 @@ public final class FarBlocks implements Listener {
 
         Map<Position, BlockData> hide = new HashMap<>();
         hopper:
-        for (int x = -hideRadius; x <= hideRadius; x++) {
-            for (int z = -hideRadius; z <= hideRadius; z++) {
+        for (int x = -scanRadius; x <= scanRadius; x++) {
+            for (int z = -scanRadius; z <= scanRadius; z++) {
                 int chunkX = center.getX() + x;
                 int chunkZ = center.getZ() + z;
                 if (!world.isChunkLoaded(chunkX, chunkZ)) {
@@ -244,8 +228,8 @@ public final class FarBlocks implements Listener {
         }
 
         outer:
-        for (int x = -hideRadius; x <= hideRadius; x++) {
-            for (int z = -hideRadius; z <= hideRadius; z++) {
+        for (int x = -scanRadius; x <= scanRadius; x++) {
+            for (int z = -scanRadius; z <= scanRadius; z++) {
                 ChunkKey key = new ChunkKey(world.getUID(), center.getX() + x, center.getZ() + z);
                 Set<BlockPosition> positions = cache.get(key);
                 if (positions == null) {
@@ -357,25 +341,6 @@ public final class FarBlocks implements Listener {
                 plugin.getLogger().log(Level.WARNING, "Could not scan a chunk for far block hiding", throwable);
             }
         }
-    }
-
-    private int hideRadius(Player player) {
-        if (!options.farBlocksToView) {
-            return Math.max(2, options.hideChunks);
-        }
-        int view = player.getSendViewDistance();
-        if (view <= 0) {
-            view = player.getViewDistance();
-        }
-        return Math.max(2, Math.min(options.hideChunks, view));
-    }
-
-    private int restoreRange(Player player, int hideRadius) {
-        int hideRange = hideRadius * 16;
-        if (options.farBlocksToView) {
-            return Math.max(8, hideRange - 8);
-        }
-        return Math.max(8, Math.min(hideRange, Math.max(options.restoreChunks * 16, hideRange - 8)));
     }
 
     private boolean hideable(Material material) {

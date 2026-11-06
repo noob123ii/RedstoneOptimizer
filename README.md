@@ -8,11 +8,9 @@ Big redstone farms send a lot of block updates that nobody standing at the farm 
 
 ## Redstone
 
-The plugin watches block update and block event packets on the way out to each player. By default every redstone part change is held back, no matter how close the player is. The server still ticks the redstone exactly as before. That stops the client from rebuilding chunk sections for every wire and piston toggle, which is what usually tanks FPS at a large farm.
+Redstone inside `far-blocks.distance` updates normally, including piston animations, observers and redstone wire changes. The server ticks the redstone exactly as before. Updates beyond that distance are dropped because those blocks are also hidden client-side, so they cannot pop back in.
 
-Every held position is remembered. Within `redstone.repair-chunks` the plugin sends the current block states in one batched section update every `redstone.refresh-interval-ticks`, so the client still catches up without seeing every intermediate step. Piston events are filtered too.
-
-If you want nearby redstone to animate normally, set `redstone.quiet-all` to false and choose a `view-chunks` range. That brings the FPS cost back for anything inside the range.
+The filter checks distance before it looks at the block material, and whole sections that are already close are skipped. That keeps the normal farm speed and animation without adding much packet work.
 
 This is a visual and network optimisation. It is not a redstone tick accelerator.
 
@@ -24,9 +22,9 @@ The range is set on each item entity, so item frames and paintings keep their no
 
 ## Far blocks
 
-Hoppers and redstone parts can be removed from the client when they are far away. The server never changes the real blocks, so farms, hoppers, water and storage still work. The first pass scans loaded chunks for hopper and redstone positions, then the client is sent air for those positions in batched section updates. Walking back inside `far-blocks.restore-chunks` restores the real block states.
+Hoppers and redstone parts are removed from the client beyond `far-blocks.distance` blocks. This is block distance, not chunk distance. The server never changes the real blocks, so farms, hoppers, water and storage still work. The first pass scans loaded chunks for hopper and redstone positions, then the client is sent air for those positions in batched section updates. Walking back inside the distance restores the real block states.
 
-By default the hide range follows the player's sent view distance, so blocks are hidden almost to the render edge. Restoration happens 8 blocks inside the hide edge, and the check runs every 10 ticks. Hoppers are found from chunk block entities every pass, so they do not wait for the slower redstone palette scan.
+Hoppers are found from chunk block entities every pass, so they do not wait for the slower redstone palette scan. The check runs every 10 ticks.
 
 ## Item piles
 
@@ -40,7 +38,7 @@ If TPS drops, the plugin widens Spigot's hopper transfer and check intervals. Th
 
 ## Under load
 
-The TPS watch runs separately from the work modules. When TPS falls below the low mark, item piles merge over a wider radius and hoppers get the slower intervals. When TPS recovers, both go back to normal. The redstone packet filter stays on.
+The TPS watch runs separately from the work modules. When TPS falls below the low mark, item piles merge over a wider radius. Hopper transfer speeds are never changed.
 
 ## Install
 
@@ -85,19 +83,9 @@ Aliases are `/ropt` and `/ro`.
 
 `items.merge.radius` and `items.merge.low-tps-radius` control pile merging in normal and loaded conditions.
 
-`redstone.quiet-all` is the main FPS switch. It is true by default and holds back every redstone update. If you set it to false, `redstone.view-chunks` controls how far redstone updates still go through.
-
-`redstone.view-chunks` is the redstone range when `quiet-all` is false. Default is 2.
-
-`redstone.repair-chunks` is how close a held redstone block must be before it is refreshed in a batch. Default is 2.
-
-`redstone.refresh-interval-ticks` is the batch refresh timer. Default is 20 ticks.
-
 `redstone.materials` lists the blocks treated as redstone parts. Buttons, pressure plates and copper bulbs are also matched by name.
 
-`far-blocks.hide-to-view` follows the player's sent view distance and hides blocks almost to the render edge. Set it to false if you want the fixed `hide-chunks` value instead.
-
-`far-blocks.hide-chunks` is the fixed hide radius used when `hide-to-view` is false. `restore-chunks` is the fixed restore radius for that mode.
+`far-blocks.distance` is the block distance used for both hiding and redstone update filtering. Default is 128 blocks.
 
 `far-blocks.scan-budget` is how many chunks are inspected per tick while building the redstone hide list. Hoppers do not depend on this scan. Lower it if chunk scanning causes a tick spike.
 
@@ -105,11 +93,9 @@ Aliases are `/ropt` and `/ro`.
 
 `hoppers.max-per-region` is the cap. Default is 4000.
 
-`hoppers.lag-tuning` controls the temporary hopper interval change.
-
 ## Tradeoffs
 
-Redstone can look stale for up to one refresh interval, and nearby redstone does not animate by default. That is the point of the filter, but it can look odd after a teleport or a large schematic paste. Turn off `redstone.quiet-all` if you need normal animation nearby.
+Redstone only stops rendering beyond the configured block distance. Inside that distance it updates and animates normally. A large schematic paste or a chunk reload can leave far blocks visible until the next hide pass catches them.
 
 The plugin does not make redstone calculate faster on the server. It reduces client chunk rebuilds, network traffic and item entity load.
 

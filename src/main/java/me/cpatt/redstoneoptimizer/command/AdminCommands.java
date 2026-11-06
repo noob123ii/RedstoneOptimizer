@@ -84,11 +84,9 @@ public final class AdminCommands implements CommandExecutor, TabCompleter {
         if (redstone == null || !options.redstoneOn) {
             sender.sendMessage(row("Redstone", "off"));
         } else {
-            String redstoneRange = options.quietAll || options.redstoneChunks == 0 ? "all quiet" : options.redstoneChunks + " chunks";
-            sender.sendMessage(row("Redstone", redstoneRange + ", "
+            sender.sendMessage(row("Redstone", options.farBlockDistance + " blocks, "
                     + redstone.viewerCount() + " players, "
-                    + redstone.heldCount() + " packets held, "
-                    + redstone.staleCount() + " stale"));
+                    + redstone.heldCount() + " packets held"));
         }
         HopperGuard hoppers = plugin.hopperGuard();
         if (hoppers == null || !options.hoppersOn) {
@@ -103,10 +101,10 @@ public final class AdminCommands implements CommandExecutor, TabCompleter {
         if (farBlocks == null || !options.farBlocksOn) {
             sender.sendMessage(row("Far blocks", "off"));
         } else if (sender instanceof Player player) {
-            sender.sendMessage(row("Far blocks", farBlocks.hideChunks(player) + "/" + farBlocks.restoreChunks(player)
-                    + " chunks, " + farBlocks.hiddenCount(player) + " hidden"));
+            sender.sendMessage(row("Far blocks", farBlocks.distance() + " blocks, "
+                    + farBlocks.hiddenCount(player) + " hidden"));
         } else {
-            sender.sendMessage(row("Far blocks", options.farBlocksToView ? "to view distance" : farBlocks.hideChunks() + " hide"));
+            sender.sendMessage(row("Far blocks", farBlocks.distance() + " blocks"));
         }
     }
 
