@@ -43,7 +43,7 @@ redstone:
 
 far-blocks:
   enabled: true
-  distance: 128
+  distance: 40
   interval-ticks: 10
   scan-budget: 6
 

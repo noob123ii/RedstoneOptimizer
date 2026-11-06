@@ -85,7 +85,7 @@ Aliases are `/ropt` and `/ro`.
 
 `redstone.materials` lists the blocks treated as redstone parts. Buttons, pressure plates and copper bulbs are also matched by name.
 
-`far-blocks.distance` is the block distance used for both hiding and redstone update filtering. Default is 128 blocks.
+`far-blocks.distance` is the block distance used for both hiding and redstone update filtering. Default is 40 blocks. Values are kept between 30 and 40.
 
 `far-blocks.scan-budget` is how many chunks are inspected per tick while building the redstone hide list. Hoppers do not depend on this scan. Lower it if chunk scanning causes a tick spike.
 

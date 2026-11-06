@@ -162,7 +162,11 @@ public final class FarBlocks implements Listener {
         World world = player.getWorld();
         Chunk center = player.getChunk();
         int distance = options.farBlockDistance;
-        int scanRadius = (distance + 15) / 16 + 1;
+        int view = player.getSendViewDistance();
+        if (view <= 0) {
+            view = player.getViewDistance();
+        }
+        int scanRadius = Math.max((distance + 15) / 16 + 1, view);
         double hideSq = (double) distance * distance;
         double restoreSq = hideSq;
 
